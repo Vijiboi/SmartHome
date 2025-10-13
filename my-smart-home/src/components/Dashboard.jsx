@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import EnergyOptimizer from './EnergyOptimizer';
 import EnergyAnalytics from './EnergyAnalytics';
+import AIEnergyOptimizer from './AIEnergyOptimizer';
+import AIChatbot from './AIChatbot';
 
 function Dashboard() {
   const [devices, setDevices] = useState([
@@ -16,10 +18,10 @@ function Dashboard() {
   // State variables for backend communication
   const [lightValue, setLightValue] = useState(0);
   const [fanValue, setFanValue] = useState(0);
-  const [serverIP, setServerIP] = useState("192.168.1.12");
+  const [serverIP, setServerIP] = useState("localhost:3001");
   const [status, setStatus] = useState("Waiting for data...");
   const [sensorData, setSensorData] = useState({ gas: 0, ldr: 0, temp: 0 });
-  const serverUrl = `http://${serverIP}:5000`;
+  const serverUrl = `http://${serverIP}`;
 
   const sendControl = (device, value) => {
     fetch(`${serverUrl}/api/control`, {
@@ -268,7 +270,14 @@ function Dashboard() {
           <p className="mt-2 text-sm text-gray-300">{status}</p>
         </div>
 
-        {/* AI Energy Optimizer Section */}
+        {/* Gemini AI Energy Optimizer Section */}
+        <AIEnergyOptimizer 
+          sensorData={sensorData}
+          onApplySuggestions={applyAISuggestions}
+          serverIP={serverIP}
+        />
+
+        {/* Original AI Energy Optimizer Section */}
         <EnergyOptimizer 
           devices={devices}
           sensorData={sensorData}
@@ -652,6 +661,9 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* AI Chatbot */}
+      <AIChatbot serverIP={serverIP} />
     </div>
   );
 }

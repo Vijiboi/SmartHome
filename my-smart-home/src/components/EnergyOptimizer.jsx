@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const EnergyOptimizer = ({ devices, sensorData, onApplySuggestions, serverIP = "192.168.1.12" }) => {
+const EnergyOptimizer = ({ devices, sensorData, onApplySuggestions, serverIP = "localhost:3001" }) => {
   const [suggestions, setSuggestions] = useState({
     lightSuggestion: 0,
     fanSuggestion: 0,
@@ -100,7 +100,7 @@ const EnergyOptimizer = ({ devices, sensorData, onApplySuggestions, serverIP = "
     const fanValue = Math.round((suggestions.fanSuggestion / 3) * 255);
     
     // Send optimization data to backend for tracking
-    fetch(`http://${serverIP}:5000/api/optimize`, {
+    fetch(`http://${serverIP}/api/optimize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

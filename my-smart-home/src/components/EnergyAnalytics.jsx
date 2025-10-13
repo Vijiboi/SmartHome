@@ -19,7 +19,7 @@ const EnergyAnalytics = ({ serverIP }) => {
   });
 
   const fetchAnalytics = React.useCallback(async () => {
-    const serverUrl = `http://${serverIP}:5000`;
+    const serverUrl = `http://${serverIP}`;
     try {
       const [analyticsRes, energyRes] = await Promise.all([
         fetch(`${serverUrl}/api/analytics`),
@@ -30,8 +30,26 @@ const EnergyAnalytics = ({ serverIP }) => {
         const analyticsData = await analyticsRes.json();
         const energyInfo = await energyRes.json();
         
-        setAnalytics(analyticsData);
-        setEnergyData(energyInfo);
+        // Ensure numeric values with defaults
+        setAnalytics({
+          peakHour: Number(analyticsData.peakHour) || 0,
+          lowHour: Number(analyticsData.lowHour) || 0,
+          averageDaily: Number(analyticsData.averageDaily) || 0,
+          currentHourUsage: Number(analyticsData.currentHourUsage) || 0,
+          efficiencyScore: Number(analyticsData.efficiencyScore) || 0,
+          totalSavings: Number(analyticsData.totalSavings) || 0,
+          optimizationCount: Number(analyticsData.optimizationCount) || 0,
+          aiSuggestionsToday: Number(analyticsData.aiSuggestionsToday) || 0
+        });
+        
+        setEnergyData({
+          currentConsumption: Number(energyInfo.currentConsumption) || 0,
+          dailyUsage: Number(energyInfo.dailyUsage) || 0,
+          hourlyUsage: Array.isArray(energyInfo.hourlyUsage) ? energyInfo.hourlyUsage : Array(24).fill(0),
+          totalSavings: Number(energyInfo.totalSavings) || 0,
+          usageHistory: Array.isArray(energyInfo.usageHistory) ? energyInfo.usageHistory : [],
+          aiSuggestions: Array.isArray(energyInfo.aiSuggestions) ? energyInfo.aiSuggestions : []
+        });
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -65,7 +83,8 @@ const EnergyAnalytics = ({ serverIP }) => {
   const calculateMonthlySavings = () => {
     // Assuming average electricity cost of ₹6 per kWh in India
     const costPerKwh = 6;
-    const dailySavingsKwh = parseFloat(analytics.totalSavings) / 1000; // Convert watts to kWh
+    const totalSavings = parseFloat(analytics.totalSavings) || 0;
+    const dailySavingsKwh = totalSavings / 1000; // Convert watts to kWh
     const monthlySavings = dailySavingsKwh * costPerKwh * 30;
     return monthlySavings.toFixed(2);
   };
@@ -121,7 +140,7 @@ const EnergyAnalytics = ({ serverIP }) => {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-blue-600">
-                {parseFloat(energyData.dailyUsage).toFixed(2)} kWh
+                {(parseFloat(energyData.dailyUsage) || 0).toFixed(2)} kWh
               </div>
               <div className="text-blue-700 font-medium text-sm">Today's Usage</div>
             </div>
@@ -273,7 +292,7 @@ const EnergyAnalytics = ({ serverIP }) => {
               </div>
               <div className="text-right">
                 <p className="text-lg font-bold text-indigo-600">
-                  {analytics.totalSavings.toFixed(1)} W
+                  {(Number(analytics.totalSavings) || 0).toFixed(1)} W
                 </p>
               </div>
             </div>
